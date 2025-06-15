@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Expense Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background-color: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        input {
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .error {
+            color: red;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Monthly Expense Calculator</h1>
+        
+        <table id="expenseTable">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Amount ($)</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" class="category" placeholder="Enter category"></td>
+                    <td><input type="number" class="amount" placeholder="Enter amount"></td>
+                    <td><button onclick="deleteRow(this)">Delete</button></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <button onclick="addRow()">Add Expense</button>
+        <button onclick="calculateExpenses()">Calculate</button>
+
+        <div class="results" id="results" style="display: none;">
+            <h2>Results</h2>
+            <p>Total Expenses: $<span id="totalExpenses">0</span></p>
+            <p>Average Daily Expense: $<span id="averageDaily">0</span></p>
+            <h3>Top 3 Expenses:</h3>
+            <ul id="topExpenses"></ul>
+        </div>
+    </div>
+
+    <script>
+        function addRow() {
+            const table = document.getElementById('expenseTable').getElementsByTagName('tbody')[0];
+            const newRow = table.insertRow();
+            
+            const cell1 = newRow.insertCell(0);
+            const cell2 = newRow.insertCell(1);
+            const cell3 = newRow.insertCell(2);
+            
+            cell1.innerHTML = '<input type="text" class="category" placeholder="Enter category">';
+            cell2.innerHTML = '<input type="number" class="amount" placeholder="Enter amount">';
+            cell3.innerHTML = '<button onclick="deleteRow(this)">Delete</button>';
+        }
+
+        function deleteRow(button) {
+            const table = document.getElementById('expenseTable').getElementsByTagName('tbody')[0];
+            if (table.rows.length > 1) {
+                const row = button.parentNode.parentNode;
+                table.removeChild(row);
+            }
+        }
+
+        function calculateExpenses() {
+            const rows = document.getElementById('expenseTable').getElementsByTagName('tbody')[0].rows;
+            const expenses = [];
+
+            // Collect all expenses
+            for (let row of rows) {
+                const category = row.cells[0].getElementsByTagName('input')[0].value;
+                const amount = parseFloat(row.cells[1].getElementsByTagName('input')[0].value);
+
+                if (category && !isNaN(amount)) {
+                    expenses.push({ category, amount });
+                }
+            }
+
+            if (expenses.length === 0) {
+                alert('Please enter at least one valid expense');
+                return;
+            }
+
+            // Calculate total
+            const total = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+            
+            // Calculate average daily (assuming 30 days)
+            const averageDaily = total / 30;
+
+            // Get top 3 expenses
+            const topExpenses = [...expenses]
+                .sort((a, b) => b.amount - a.amount)
+                .slice(0, 3);
+
+            // Display results
+            document.getElementById('totalExpenses').textContent = total.toFixed(2);
+            document.getElementById('averageDaily').textContent = averageDaily.toFixed(2);
+            
+            const topExpensesList = document.getElementById('topExpenses');
+            topExpensesList.innerHTML = '';
+            topExpenses.forEach(expense => {
+                const li = document.createElement('li');
+                li.textContent = `${expense.category}: $${expense.amount.toFixed(2)}`;
+                topExpensesList.appendChild(li);
+            });
+
+            document.getElementById('results').style.display = 'block';
+        }
+    </script>
+</body>
+</html> 
